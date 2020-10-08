@@ -1,0 +1,164 @@
+<!DOCTYPE html> 
+<html> 
+
+<head> 
+	<title>SortierAlgorithmus</title> 
+	
+	<meta charset="UTF-8"> 
+
+	<script src= "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"
+	type="text/javascript"></script> 
+
+<!--Css-code----------------------------------------------------------------------->	
+	<style> 
+		body { 
+			padding: 0; 
+			background: #333333;
+		} 
+		canvas { 
+			vertical-align: top; 
+			display: block;
+			margin-left: auto;
+			margin-right: auto;
+		} 
+
+		div {
+			color: white;
+		}	
+	</style> 
+</head>
+
+<body>
+		
+	<form>
+         <input type="button" onclick="bubbleSort(Werte,0, Werte.length)" value="BubbleSort"/>
+         <input type="button" onclick="ShellSort(Werte, 0, Werte.length)" value="ShellSort" />
+         <input type="button" onclick="MergeSort(Werte, 0, Werte.length)" value="MergeSort" />
+         <input type="button" onclick="QuickSort(Werte, 0, Werte.length)" value="QuickSort" />
+         <input type="button" onclick="setup();" value="Neue Array" />
+    </form>
+
+    	<div>Anzahl der Zahlen:</div>  
+    	<div><input type="range" min="10" max="70" value="40" id="WSlider"></div>  
+    	<div>Sortier-Geschwindigkeit: </div>  
+    	<div><input type="range" min="0" max="200" value="100" id="SpeedSlider"></div>   
+    	 	
+	<!--JavaScript----------------------------------------------------------------------->
+	
+	<script type="text/javascript"> 
+		
+		var sliderW = document.getElementById("WSlider");
+		let w = sliderW.value;  //Globale Variable mit der die Anzahl der Balken errechnet wird
+		sliderW.oninput = async function() {
+  			w = this.value;
+  			await setup();
+		} 
+
+
+		let Werte = []; //Globale Variable für Zahlen
+		let FarbStatus = []; //Status des Balkens um die Farbe festzulegen
+				
+		
+		function setup() { //P5.js Funktion, die ausgeführt wird, wenn das Program startet
+			
+
+			createCanvas(1750, 800); //createCanvas(width, height);
+			Werte = new Array(floor(width/w)); //Array mit so vielen Elementen, wie errechnet
+		
+			for(let i = 0; i < Werte.length; i++) { //Array wird mit zufälligen Zahlen gefüllt
+				Werte[i] = float(random(height)); 
+				FarbStatus[i] = -1; 
+			} 
+				
+			
+		} 
+
+		
+		async function bubbleSort(arr, Anfang, Ende) { //Bubblesort algorithmus
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			for(var i = 0; i < Ende-1; i++) { 
+				for(var h = 0; h < Ende-i-1; h++) { 
+					if(arr[h] >= arr[h+1]) { 
+						FarbStatus[h] = 1; 			//rot, (wird getauscht)
+						await Tausch(arr, h, h+1); 
+						FarbStatus[h+1] = 0; 		//grün (Fertig sortiert)
+					} 
+					FarbStatus[h] = -1; 
+				} 
+			} 
+			return arr; 
+		} 
+
+
+		async function mergeSort(arr, Anfang, Ende) { 
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			//ToDo
+		}
+
+		async function quickSort(arr, Anfang, Ende) { 
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			//ToDo
+		}
+
+		async function heapSort(arr, Anfang, Ende) { 
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			//ToDo
+		}
+
+		async function shellSort(arr, Anfang, Ende) { 
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			//ToDo
+		}
+	
+		 
+		function draw() {  // Draw() ist eine zu P5.js gehörende Funktion, die nach  setUp() im loop läuft
+			background(51); 
+			
+			for(let i = 0; i < Werte.length; i++) { 
+				stroke(0); 
+				strokeWeight(2);
+				fill("#FFFFFF"); 
+				
+				if(FarbStatus[i] == 0) { 
+					fill("#81F781"); 		//fertig zugeordnet
+				} 
+				else if (FarbStatus[i] == 1) { 
+					fill("#a64e4e"); 		//grade sortiert
+				} 
+				
+				rect(i*w, height - Werte[i], w, Werte[i]);  //"zeichnen der Rechtecke"
+			} 
+		} 
+		
+		 
+		async function Tausch(arr, a, b) { 
+			var sliderSpeed = document.getElementById("SpeedSlider");
+			await sleep(sliderSpeed.value);  //SortierGeschwindigke
+			let t = arr[a]; 
+			arr[a] = arr[b]; 
+			arr[b] = t; 
+		} 
+		
+		// Definition of sleep function 
+		function sleep(ms) { 
+			return new Promise(resolve => setTimeout(resolve, ms)); 
+		} 
+	</script> 
+</body> 
+
+</html>			 
