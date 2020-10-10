@@ -2,7 +2,7 @@
 <html> 
 
 <head> 
-	<title>SortierAlgorithmus</title> 
+	<title>Sortier Algorithmus</title> 
 	
 	<meta charset="UTF-8"> 
 
@@ -32,14 +32,14 @@
 		
 	<form>
          <input type="button" onclick="bubbleSort(Werte,0, Werte.length)" value="BubbleSort"/>
-         <input type="button" onclick="ShellSort(Werte, 0, Werte.length)" value="ShellSort" />
-         <input type="button" onclick="MergeSort(Werte, 0, Werte.length)" value="MergeSort" />
+         <input type="button" onclick="InsertionSort(Werte, 0, Werte.length)" value="InsertionSort" />
+         <input type="button" onclick="SelectionSort(Werte, 0, Werte.length)" value="SelectionSort" />
          <input type="button" onclick="QuickSort(Werte, 0, Werte.length)" value="QuickSort" />
          <input type="button" onclick="setup();" value="Neue Array" />
     </form>
 
     	<div>Anzahl der Zahlen:</div>  
-    	<div><input type="range" min="10" max="70" value="40" id="WSlider"></div>  
+    	<div><input type="range" min="5" max="100" value="52" id="WSlider"></div>  
     	<div>Sortier-Geschwindigkeit: </div>  
     	<div><input type="range" min="0" max="200" value="100" id="SpeedSlider"></div>   
     	 	
@@ -67,10 +67,8 @@
 		
 			for(let i = 0; i < Werte.length; i++) { //Array wird mit zufälligen Zahlen gefüllt
 				Werte[i] = float(random(height)); 
-				FarbStatus[i] = -1; 
+				FarbStatus[i] = -1; 				//alle weiß
 			} 
-				
-			
 		} 
 
 		
@@ -83,22 +81,83 @@
 				for(var h = 0; h < Ende-i-1; h++) { 
 					if(arr[h] >= arr[h+1]) { 
 						FarbStatus[h] = 1; 			//rot, (wird getauscht)
-						await Tausch(arr, h, h+1); 
+						await wartezeit();
+						let t = arr[h]; 
+						arr[h] = arr[h+1]; 
+						arr[h+1] = t;  
 						FarbStatus[h+1] = 0; 		//grün (Fertig sortiert)
 					} 
-					FarbStatus[h] = -1; 
+					FarbStatus[h] = -1;
+					FarbStatus[h+1] = 0; 
 				} 
 			} 
 			return arr; 
 		} 
 
+		
 
-		async function mergeSort(arr, Anfang, Ende) { 
+		async function SelectionSort(arr, Anfang, Ende) { 
 			if(Anfang >= Ende) { 
 				return; 
 			} 
 			
-			//ToDo
+			for(var i=0; i < Ende-1; i++){
+				let indexMinimum = i;
+				FarbStatus[i] = 1;
+				for(var j = i; j<Ende; j++){
+					FarbStatus[j] = 1;
+					await wartezeit();
+					if (arr[j] < arr[indexMinimum]){
+						FarbStatus[indexMinimum] = -1;
+						indexMinimum = j;
+						FarbStatus[j] = 1;
+					}
+					else {
+						FarbStatus[j] = -1;	
+					} 
+				}
+				FarbStatus[indexMinimum] = -1;
+				let t = arr[i];
+				arr[i] = arr[indexMinimum];
+				arr[indexMinimum] = t;
+				FarbStatus[i] = 0;
+			}
+			return arr;
+		}
+
+
+
+
+		async function InsertionSort(arr, Anfang, Ende) { 
+			if(Anfang >= Ende) { 
+				return; 
+			} 
+			
+			for (var i = 1; i < Ende; i++){
+				let einzusortieren = arr[i];
+				let j = i;
+				while ((j > 0) && (arr[j-1] > einzusortieren)){
+					FarbStatus[j] = 1;
+					FarbStatus[j-1] = 1;
+					await wartezeit();
+					FarbStatus[j] = -1;
+					FarbStatus[j-1] = -1;
+					let t = arr[j];
+					arr[j] = arr[j-1];
+					arr[j-1] = t;
+
+					j = j-1;			
+				}
+				await wartezeit();
+				arr[j] = einzusortieren;
+				FarbStatus[i] = -1;
+			}
+
+			for (var i = 0; i < Ende; i++){
+				await wartezeit();
+				FarbStatus[i] = 0;
+			}
+			return arr;
 		}
 
 		async function quickSort(arr, Anfang, Ende) { 
@@ -117,13 +176,7 @@
 			//ToDo
 		}
 
-		async function shellSort(arr, Anfang, Ende) { 
-			if(Anfang >= Ende) { 
-				return; 
-			} 
-			
-			//ToDo
-		}
+		
 	
 		 
 		function draw() {  // Draw() ist eine zu P5.js gehörende Funktion, die nach  setUp() im loop läuft
@@ -138,7 +191,10 @@
 					fill("#81F781"); 		//fertig zugeordnet
 				} 
 				else if (FarbStatus[i] == 1) { 
-					fill("#a64e4e"); 		//grade sortiert
+					fill("#6c3b6c"); 		//grade sortiert
+				} 
+				else if (FarbStatus[i] == 2) { 
+					fill("#FF8C00"); 		//grade sortiert
 				} 
 				
 				rect(i*w, height - Werte[i], w, Werte[i]);  //"zeichnen der Rechtecke"
@@ -146,15 +202,12 @@
 		} 
 		
 		 
-		async function Tausch(arr, a, b) { 
+		async function wartezeit(){
 			var sliderSpeed = document.getElementById("SpeedSlider");
-			await sleep(sliderSpeed.value);  //SortierGeschwindigke
-			let t = arr[a]; 
-			arr[a] = arr[b]; 
-			arr[b] = t; 
-		} 
+			await sleep(sliderSpeed.value);  //SortierGeschwindigkeit
+		}
 		
-		// Definition of sleep function 
+		// Definition von sleep function 
 		function sleep(ms) { 
 			return new Promise(resolve => setTimeout(resolve, ms)); 
 		} 
