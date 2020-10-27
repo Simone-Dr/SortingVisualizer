@@ -34,7 +34,7 @@
          <input type="button" onclick="bubbleSort(Werte,0, Werte.length)" value="BubbleSort"/>
          <input type="button" onclick="InsertionSort(Werte, 0, Werte.length)" value="InsertionSort" />
          <input type="button" onclick="SelectionSort(Werte, 0, Werte.length)" value="SelectionSort" />
-         <input type="button" onclick="QuickSort(Werte, 0, Werte.length)" value="QuickSort" />
+         <input type="button" onclick="QuickSort(Werte, 0, Werte.length - 1)" value="QuickSort" />
          <input type="button" onclick="setup();" value="Neue Array" />
     </form>
 
@@ -82,9 +82,7 @@
 					if(arr[h] >= arr[h+1]) { 
 						FarbStatus[h] = 1; 			//rot, (wird getauscht)
 						await wartezeit();
-						let t = arr[h]; 
-						arr[h] = arr[h+1]; 
-						arr[h+1] = t;  
+						Tauschen(arr, h, h+1); 
 						FarbStatus[h+1] = 0; 		//grün (Fertig sortiert)
 					} 
 					FarbStatus[h] = -1;
@@ -96,7 +94,7 @@
 
 		
 
-		async function SelectionSort(arr, Anfang, Ende) { 
+		async function SelectionSort(arr, Anfang, Ende){ 
 			if(Anfang >= Ende) { 
 				return; 
 			} 
@@ -117,16 +115,11 @@
 					} 
 				}
 				FarbStatus[indexMinimum] = -1;
-				let t = arr[i];
-				arr[i] = arr[indexMinimum];
-				arr[indexMinimum] = t;
+				Tauschen(arr, i, indexMinimum);
 				FarbStatus[i] = 0;
 			}
 			return arr;
 		}
-
-
-
 
 		async function InsertionSort(arr, Anfang, Ende) { 
 			if(Anfang >= Ende) { 
@@ -136,16 +129,16 @@
 			for (var i = 1; i < Ende; i++){
 				let einzusortieren = arr[i];
 				let j = i;
+				
 				while ((j > 0) && (arr[j-1] > einzusortieren)){
 					FarbStatus[j] = 1;
 					FarbStatus[j-1] = 1;
+					FarbStatus[i] = -1;
+					FarbStatus[i+1] = 2;
 					await wartezeit();
 					FarbStatus[j] = -1;
 					FarbStatus[j-1] = -1;
-					let t = arr[j];
-					arr[j] = arr[j-1];
-					arr[j-1] = t;
-
+					Tauschen(arr, j, j-1);
 					j = j-1;			
 				}
 				await wartezeit();
@@ -160,13 +153,42 @@
 			return arr;
 		}
 
-		async function quickSort(arr, Anfang, Ende) { 
+		async function QuickSort(arr, Anfang, Ende) { 
 			if(Anfang >= Ende) { 
+				FarbStatus[Ende] = 0;
 				return; 
-			} 
-			
-			//ToDo
-		}
+			} 	
+			let pivotWert = arr[Ende];
+			let pivotIndex = Anfang;
+			FarbStatus[Ende] = 1;	
+
+			for (let i = Anfang; i < Ende; i++) { //Array wird sortiert in was kleiner und was größer als der Pivot ist
+    			if (arr[i] < pivotWert) {
+      				await wartezeit();
+      				Tauschen(arr, i, pivotIndex);
+      				pivotIndex++;			
+    			}
+  			}
+
+  			await wartezeit();
+  			Tauschen(arr, pivotIndex, Ende); //Pivot wird in die Reihe gesetzt, ist sortiert
+  			
+  			FarbStatus[pivotIndex] = 0;
+  			FarbStatus[Ende] = -1;
+  			for (let i = pivotIndex + 1; i < Ende; i++) {
+     			FarbStatus[i] = 2;
+  			}
+
+  			for (let i = Anfang; i < pivotIndex - 1; i++) {
+     			FarbStatus[i] = -1;
+  			}
+
+  			await Promise.all([
+   				QuickSort(arr, Anfang, pivotIndex - 1),
+    			QuickSort(arr, pivotIndex + 1, Ende)
+  			]);
+		} 
+	
 
 		async function heapSort(arr, Anfang, Ende) { 
 			if(Anfang >= Ende) { 
@@ -176,7 +198,7 @@
 			//ToDo
 		}
 
-		
+			
 	
 		 
 		function draw() {  // Draw() ist eine zu P5.js gehörende Funktion, die nach  setUp() im loop läuft
@@ -188,14 +210,15 @@
 				fill("#FFFFFF"); 
 				
 				if(FarbStatus[i] == 0) { 
-					fill("#81F781"); 		//fertig zugeordnet
+					fill("#81F781"); 		//fertig zugeordnet, grün
 				} 
 				else if (FarbStatus[i] == 1) { 
-					fill("#6c3b6c"); 		//grade sortiert
+					fill("#F7819F"); 		//grade sortiert, rosa
 				} 
 				else if (FarbStatus[i] == 2) { 
-					fill("#FF8C00"); 		//grade sortiert
+					fill("#F7BE81"); 		//grade sortiert, orange
 				} 
+
 				
 				rect(i*w, height - Werte[i], w, Werte[i]);  //"zeichnen der Rechtecke"
 			} 
@@ -211,6 +234,13 @@
 		function sleep(ms) { 
 			return new Promise(resolve => setTimeout(resolve, ms)); 
 		} 
+
+		function Tauschen(arr, a, b){
+			let t = arr[a];
+  			arr[a] = arr[b];
+  			arr[b] = t;	
+		}
+
 	</script> 
 </body> 
 
