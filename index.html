@@ -3,245 +3,26 @@
 
 <head> 
 	<title>SortingVisualizer/</title> 
-	
 	<meta charset="UTF-8"> 
-
 	<script src= "https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"
 	type="text/javascript"></script> 
-
-<!--Css-code----------------------------------------------------------------------->	
-	<style> 
-		body { 
-			padding: 0; 
-			background: #333333;
-		} 
-		canvas { 
-			vertical-align: top; 
-			display: block;
-			margin-left: auto;
-			margin-right: auto;
-		} 
-
-		div {
-			color: white;
-		}	
-	</style> 
+	<link href="https://fonts.googleapis.com/css?family=Abel" rel="stylesheet">
+	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-		
-	<form>
-         <input type="button" onclick="bubbleSort(Werte,0, Werte.length)" value="BubbleSort"/>
-         <input type="button" onclick="InsertionSort(Werte, 0, Werte.length)" value="InsertionSort" />
-         <input type="button" onclick="SelectionSort(Werte, 0, Werte.length)" value="SelectionSort" />
-         <input type="button" onclick="QuickSort(Werte, 0, Werte.length - 1)" value="QuickSort" />
-         <input type="button" onclick="setup();" value="New Array" />
-    </form>
-
-    	<div>Number of elements:</div>  
-    	<div><input type="range" min="5" max="100" value="52" id="WSlider"></div>  
-    	<div>Sorting speed: </div>  
-    	<div><input type="range" min="0" max="200" value="100" id="SpeedSlider"></div>   
-    	 	
-	<!--JavaScript----------------------------------------------------------------------->
-	
-	<script type="text/javascript"> 
-		
-		var sliderW = document.getElementById("WSlider");
-		let w = sliderW.value;  //Globale Variable mit der die Anzahl der Balken errechnet wird
-		sliderW.oninput = async function() {
-  			w = this.value;
-  			await setup();
-		} 
-
-
-		let Werte = []; //Globale Variable für Zahlen
-		let FarbStatus = []; //Status des Balkens um die Farbe festzulegen
-				
-		
-		function setup() { //P5.js Funktion, die ausgeführt wird, wenn das Program startet
-			
-
-			createCanvas(1750, 800); //createCanvas(width, height);
-			Werte = new Array(floor(width/w)); //Array mit so vielen Elementen, wie errechnet
-		
-			for(let i = 0; i < Werte.length; i++) { //Array wird mit zufälligen Zahlen gefüllt
-				Werte[i] = float(random(height)); 
-				FarbStatus[i] = -1; 				//alle weiß
-			} 
-		} 
-
-		
-		async function bubbleSort(arr, Anfang, Ende) { //Bubblesort algorithmus
-			if(Anfang >= Ende) { 
-				return; 
-			} 
-			
-			for(var i = 0; i < Ende-1; i++) { 
-				for(var h = 0; h < Ende-i-1; h++) { 
-					if(arr[h] >= arr[h+1]) { 
-						FarbStatus[h] = 1; 			//rot, (wird getauscht)
-						await wartezeit();
-						Tauschen(arr, h, h+1); 
-						FarbStatus[h+1] = 0; 		//grün (Fertig sortiert)
-					} 
-					FarbStatus[h] = -1;
-					FarbStatus[h+1] = 0; 
-				} 
-			} 
-			return arr; 
-		} 
-
-		
-
-		async function SelectionSort(arr, Anfang, Ende){ 
-			if(Anfang >= Ende) { 
-				return; 
-			} 
-			
-			for(var i=0; i < Ende-1; i++){
-				let indexMinimum = i;
-				FarbStatus[i] = 1;
-				for(var j = i; j<Ende; j++){
-					FarbStatus[j] = 1;
-					await wartezeit();
-					if (arr[j] < arr[indexMinimum]){
-						FarbStatus[indexMinimum] = -1;
-						indexMinimum = j;
-						FarbStatus[j] = 1;
-					}
-					else {
-						FarbStatus[j] = -1;	
-					} 
-				}
-				FarbStatus[indexMinimum] = -1;
-				Tauschen(arr, i, indexMinimum);
-				FarbStatus[i] = 0;
-			}
-			return arr;
-		}
-
-		async function InsertionSort(arr, Anfang, Ende) { 
-			if(Anfang >= Ende) { 
-				return; 
-			} 
-			
-			for (var i = 1; i < Ende; i++){
-				let einzusortieren = arr[i];
-				let j = i;
-				
-				while ((j > 0) && (arr[j-1] > einzusortieren)){
-					FarbStatus[j] = 1;
-					FarbStatus[j-1] = 1;
-					FarbStatus[i] = -1;
-					FarbStatus[i+1] = 2;
-					await wartezeit();
-					FarbStatus[j] = -1;
-					FarbStatus[j-1] = -1;
-					Tauschen(arr, j, j-1);
-					j = j-1;			
-				}
-				await wartezeit();
-				arr[j] = einzusortieren;
-				FarbStatus[i] = -1;
-			}
-
-			for (var i = 0; i < Ende; i++){
-				await wartezeit();
-				FarbStatus[i] = 0;
-			}
-			return arr;
-		}
-
-		async function QuickSort(arr, Anfang, Ende) { 
-			if(Anfang >= Ende) { 
-				FarbStatus[Ende] = 0;
-				return; 
-			} 	
-			let pivotWert = arr[Ende];
-			let pivotIndex = Anfang;
-			FarbStatus[Ende] = 1;	
-
-			for (let i = Anfang; i < Ende; i++) { //Array wird sortiert in was kleiner und was größer als der Pivot ist
-    			if (arr[i] < pivotWert) {
-      				await wartezeit();
-      				Tauschen(arr, i, pivotIndex);
-      				pivotIndex++;			
-    			}
-  			}
-
-  			await wartezeit();
-  			Tauschen(arr, pivotIndex, Ende); //Pivot wird in die Reihe gesetzt, ist sortiert
-  			
-  			FarbStatus[pivotIndex] = 0;
-  			FarbStatus[Ende] = -1;
-  			for (let i = pivotIndex + 1; i < Ende; i++) {
-     			FarbStatus[i] = 2;
-  			}
-
-  			for (let i = Anfang; i < pivotIndex - 1; i++) {
-     			FarbStatus[i] = -1;
-  			}
-
-  			await Promise.all([
-   				QuickSort(arr, Anfang, pivotIndex - 1),
-    			QuickSort(arr, pivotIndex + 1, Ende)
-  			]);
-		} 
-	
-
-		async function heapSort(arr, Anfang, Ende) { 
-			if(Anfang >= Ende) { 
-				return; 
-			} 
-			
-			//ToDo
-		}
-
-			
-	
-		 
-		function draw() {  // Draw() ist eine zu P5.js gehörende Funktion, die nach  setUp() im loop läuft
-			background(51); 
-			
-			for(let i = 0; i < Werte.length; i++) { 
-				stroke(0); 
-				strokeWeight(2);
-				fill("#FFFFFF"); 
-				
-				if(FarbStatus[i] == 0) { 
-					fill("#81F781"); 		//fertig zugeordnet, grün
-				} 
-				else if (FarbStatus[i] == 1) { 
-					fill("#F7819F"); 		//grade sortiert, rosa
-				} 
-				else if (FarbStatus[i] == 2) { 
-					fill("#F7BE81"); 		//grade sortiert, orange
-				} 
-
-				
-				rect(i*w, height - Werte[i], w, Werte[i]);  //"zeichnen der Rechtecke"
-			} 
-		} 
-		
-		 
-		async function wartezeit(){
-			var sliderSpeed = document.getElementById("SpeedSlider");
-			await sleep(sliderSpeed.value);  //SortierGeschwindigkeit
-		}
-		
-		// Definition von sleep function 
-		function sleep(ms) { 
-			return new Promise(resolve => setTimeout(resolve, ms)); 
-		} 
-
-		function Tauschen(arr, a, b){
-			let t = arr[a];
-  			arr[a] = arr[b];
-  			arr[b] = t;	
-		}
-
-	</script> 
+	<button class="button" onclick = "bubbleSort(Werte,0, Werte.length)">BubbleSort</button>
+	<button class="button" onclick = "InsertionSort(Werte, 0, Werte.length)">InsertionSort</button>
+	<button class="button" onclick = "SelectionSort(Werte, 0, Werte.length)">SelectionSort</button>
+	<button class="button" onclick = "QuickSort(Werte, 0, Werte.length - 1)">QuickSort Lomuto</button>
+	<button class="button" onclick = "QuickSortHoare(Werte, 0, Werte.length -1)">QuickSort Hoare</button>
+	<button class="button" onclick = "setup()">New Array</button>
+	<br>
+	Number of elements:
+	<input type="range" min="2" max="150" value="52" id="numberOfElementsSlider" class="slider"> 
+	Sorting speed: 
+	<input type="range" min="0" max="200" value="100" id="SpeedSlider"class="slider">	
 </body> 
 
+<script src="sketch.js"></script>
 </html>			 
